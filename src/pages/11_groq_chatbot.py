@@ -5,6 +5,7 @@ import streamlit as st
 from groq import Groq
 
 from components.Message import Message
+from components.ModelSelector import ModelSelector
 
 
 # 関数の定義
@@ -49,7 +50,8 @@ class GroqAPI:
 
 
 # sidebar: model selector
-selected_model = model_select()
+model = ModelSelector()
+st.session_state.selected_model = model.select()
 
 # main pageの内容
 st.title("Groq Chatbot")
@@ -66,7 +68,7 @@ message.display_chat_history()
 # ユーザー入力
 if prompt := st.chat_input("What is your question?"):
 
-    llm = GroqAPI(selected_model)
+    llm = GroqAPI(st.session_state.selected_model)
 
     message.add_display("user", prompt)
 
