@@ -1,9 +1,8 @@
 # 11_groq_chatbot.py
-import os
-
 import streamlit as st
 from groq import Groq
 
+from components.GropApiKey import GropApiKey
 from components.Message import Message
 from components.ModelSelector import ModelSelector
 
@@ -24,7 +23,8 @@ def model_select():
 
 class GroqAPI:
     def __init__(self, model_name: str):
-        self.client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+        # self.client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+        self.client = Groq(api_key=st.session_state.groq_api_key)
         self.model_name = model_name
 
     def _response(self, message):
@@ -48,6 +48,10 @@ class GroqAPI:
             if chunk.choices[0].delta.content:
                 yield chunk.choices[0].delta.content
 
+
+# sidebar: apikey input
+groq_api_key = GropApiKey()
+groq_api_key.input_key()
 
 # sidebar: model selector
 model = ModelSelector()
