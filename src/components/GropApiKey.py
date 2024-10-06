@@ -27,3 +27,9 @@ class GropApiKey:
                 value=self.api_key,
             )
             st.markdown("[Get an Groq API key](https://console.groq.com/keys)")
+
+    def key(self):
+        return self.api_key
+
+    def has_key(self):
+        return self.api_key != ""
