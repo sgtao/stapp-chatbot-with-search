@@ -91,8 +91,8 @@ task export-req-with-dev
 ```sh
 PROJECT_NAME="stapp-excel2csv"
 GITHUB_URL="https://github.com/sgtao/${PROJECT_NAME}.git"
-git clone https://github.com/sgtao/stapp-template.git $PROJECT_NAME
-cd  $PROJECT_NAME
+# git clone https://github.com/sgtao/stapp-template.git $PROJECT_NAME
+# cd  $PROJECT_NAME
 # git remote add origin $GITHUB_URL
 git remote set-url origin $GITHUB_URL
 git branch -M main
