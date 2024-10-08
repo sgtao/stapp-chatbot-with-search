@@ -7,20 +7,6 @@ from components.ModelSelector import ModelSelector
 from functions.GroqAPI import GroqAPI
 
 
-# 関数の定義
-def self_rag_response(prompt):
-    print(f"prompt: {prompt}")
-    response = ["hello"]
-    return response
-
-
-def model_select():
-    models = ["llama3-8b-8192", "llama3-70b-8192"]
-    with st.sidebar:
-        st.sidebar.title("model select:")
-        return st.selectbox("", models)
-
-
 # sidebar: apikey input
 groq_api_key = GropApiKey()
 groq_api_key.input_key()
@@ -32,30 +18,36 @@ st.session_state.selected_model = model.select()
 # main pageの内容
 st.title("Groq Chatbot")
 
-# チャット履歴
-if "messages" not in st.session_state:
-    st.session_state.messages = []
+if groq_api_key.has_key() is False:
+    st.error("API-Keyを設定してください")
+else:
+    # チャット履歴
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
 
-# チャット履歴表示
-# print(st.session_state.messages)
-message = Message()
-message.display_chat_history()
+    # チャット履歴表示
+    # print(st.session_state.messages)
+    message = Message()
+    message.display_chat_history()
 
-# ユーザー入力
-if prompt := st.chat_input("What is your question?"):
+    # ユーザー入力
+    if prompt := st.chat_input("What is your question?"):
 
-    llm = GroqAPI(
-        api_key=groq_api_key.key(),
-        model_name=st.session_state.selected_model,
-    )
+        llm = GroqAPI(
+            api_key=groq_api_key.key(),
+            model_name=st.session_state.selected_model,
+        )
 
-    message.add_display("user", prompt)
+        message.add_display("user", prompt)
 
-    completion = llm.completion(st.session_state.messages)
+        # completion = llm.completion(st.session_state.messages)
+        # message.add_display("assistant", completion)
+        response = message.display_stream(
+            generater=llm.response_stream(st.session_state.messages)
+        )
+        message.add("assistant", response)
 
-    message.add_display("assistant", completion)
-
-# 反省トークンと検索結果の表示（オプション）
-# with st.expander("Show Reflection Tokens and Retrieved Documents"):
-#     st.write(reflection_tokens)
-#     st.write(retrieved_documents)
+    # 反省トークンと検索結果の表示（オプション）
+    # with st.expander("Show Reflection Tokens and Retrieved Documents"):
+    #     st.write(reflection_tokens)
+    #     st.write(retrieved_documents)
