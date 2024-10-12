@@ -29,50 +29,47 @@ class GroqAPI:
         )
 
     def _response_stream(self, message):
-        """Groq APIに非ストリーミングで送信し、レスポンスを取得します。
-        Args:
-            message: APIに送信するメッセージ
-
-        Returns:
-            APIからのレスポンス
-        """
         return self.client.chat.completions.create(
             model=self.model_name,
             messages=message,
             temperature=0,
             max_tokens=4096,
-            # stream=True,
-            stream=False,
+            stream=True,
             stop=None,
         )
 
     def completion(self, message):
+        """Groq APIにPrompt messageを送信し、レスポンスを取得します。
+        Args:
+            message: APIに送信するメッセージ
+        Return:
+            str: レスポンスの各チャンク
+        """
         response = self._response(message)
         completion_content = response.choices[0].message.content
         return completion_content
 
     def response_stream(self, message):
         """Groq APIにストリーミングで送信し、レスポンスを取得します。
-
         Args:
             message: APIに送信するメッセージ
-
         Yields:
             str: レスポンスの各チャンク
 
         利用例：
           llm = GroqAPI(st.session_state.selected_model)
-
           with st.chat_message("assistant"):
-              msg_place = st.empty()
+              message_placeholder = st.empty()
               full_response = ""
-              # ここでLangChainを使用してSELF-RAG処理を行う
-              # 結果をストリーミング表示
-              for chunk in llm.response_stream(prompt):
+              for chunk in llm.response_stream(st.session_state.messages):
                   full_response += chunk
-                  msg_place.markdown(full_response + "▌")
-              msg_place.markdown(full_response)
+                  message_placeholder.markdown(full_response + "▌")
+              message_placeholder.markdown(full_response)
+          st.session_state.messages.append(
+              {"role": "assistant", "content": full_response}
+          )
         """
-        for chunk in self._response_stream(message):
-            if chunk.choices[0].delta.content:
+        response = self._response_stream(message)
+        for chunk in response:
+            if chunk.choices[0].delta.content is not None:
                 yield chunk.choices[0].delta.content

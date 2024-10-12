@@ -40,12 +40,21 @@ else:
 
         message.add_display("user", prompt)
 
-        completion = llm.completion(st.session_state.messages)
-        message.add_display("assistant", completion)
-        # response = message.display_stream(
-        #     generater=llm.response_stream(st.session_state.messages)
-        # )
-        # message.add("assistant", response)
+        # completion = llm.completion(st.session_state.messages)
+        # message.add_display("assistant", completion)
+
+        # ストリーミングレスポンスの表示
+        with st.chat_message("assistant"):
+            message_placeholder = st.empty()
+            full_response = ""
+            for chunk in llm.response_stream(st.session_state.messages):
+                full_response += chunk
+                message_placeholder.markdown(full_response + "▌")
+            message_placeholder.markdown(full_response)
+
+        st.session_state.messages.append(
+            {"role": "assistant", "content": full_response}
+        )
 
         # 最後のメッセージまでスクロール
         st.markdown(
