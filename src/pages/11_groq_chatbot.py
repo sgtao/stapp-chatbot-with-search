@@ -25,6 +25,9 @@ else:
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
+    # StreamIOの切り替え
+    stream_enabled = st.checkbox("ストリーム回答を有効にする", value=True)
+
     # チャット履歴表示
     # print(st.session_state.messages)
     message = Message()
@@ -40,17 +43,20 @@ else:
 
         message.add_display("user", prompt)
 
-        # completion = llm.completion(st.session_state.messages)
-        # message.add_display("assistant", completion)
-
-        # ストリーミングレスポンスの表示
-        with st.chat_message("assistant"):
-            message_placeholder = st.empty()
-            full_response = ""
-            for chunk in llm.response_stream(st.session_state.messages):
-                full_response += chunk
-                message_placeholder.markdown(full_response + "▌")
-            message_placeholder.markdown(full_response)
+        if stream_enabled:
+            # ストリーミングレスポンスの表示
+            with st.chat_message("assistant"):
+                message_placeholder = st.empty()
+                full_response = ""
+                for chunk in llm.response_stream(st.session_state.messages):
+                    full_response += chunk
+                    message_placeholder.markdown(full_response + "▌")
+                message_placeholder.markdown(full_response)
+        else:
+            # 通常の回答表示
+            completion = llm.completion(st.session_state.messages)
+            message.add_display("assistant", completion)
+            full_response = completion
 
         st.session_state.messages.append(
             {"role": "assistant", "content": full_response}
