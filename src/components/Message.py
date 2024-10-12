@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import streamlit as st
 
 
@@ -14,15 +16,25 @@ class Message:
                 {
                     "role": "system",
                     "content": self.system_prompt,
+                    "timestamp": self.get_timestamp(),
                 }
             ]
 
     def get_name(self):
         return self.name
 
+    def get_timestamp(self):
+        # ミリ秒単位までの現在の日時を取得
+        current_time = datetime.now().strftime("%Y%m%d-%H%M%S.%f")[:-3]
+        return current_time
+
     def add(self, role: str, content: str):
         st.session_state[self.session_key].append(
-            {"role": role, "content": content}
+            {
+                "role": role,
+                "content": content,
+                "timestamp": self.get_timestamp(),
+            }
         )
 
     def add_display(self, role: str, content: str):
@@ -38,6 +50,17 @@ class Message:
                 st.markdown(message["content"])
 
     def get_messages(self):
+        messages = []
+        for message in st.session_state[self.session_key]:
+            messages.append(
+                {
+                    "role": message["role"],
+                    "content": message["content"],
+                }
+            )
+        return messages
+
+    def messages_history(self):
         return st.session_state[self.session_key]
 
     def clear_messages(self):

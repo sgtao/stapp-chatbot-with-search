@@ -21,7 +21,7 @@ class ManageChatbot:
         # チャット履歴をダウンロードするボタン
         if st.checkbox("Save chat history?", value=False):
             # チャット履歴をJSONに変換
-            chat_history = message.get_messages()
+            chat_history = message.messages_history()
             chat_json = json.dumps(chat_history, ensure_ascii=False, indent=2)
             st.download_button(
                 label="Download as json",
