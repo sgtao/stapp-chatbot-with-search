@@ -29,7 +29,3 @@ class Message:
                 continue
             with st.chat_message(message["role"]):
                 st.markdown(message["content"])
-
-    def display_stream(self, generater):
-        with st.chat_message("assistant"):
-            return st.write_stream(generater)
