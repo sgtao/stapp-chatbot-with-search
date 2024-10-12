@@ -1,35 +1,14 @@
 # 11_groq_chatbot.py
-import json
-from datetime import datetime
-
 import streamlit as st
 
 from components.GropApiKey import GropApiKey
 from components.Message import Message
 from components.ModelSelector import ModelSelector
+from components.ManageChatbot import ManageChatbot
 from functions.GroqAPI import GroqAPI
 
 # Message インスタンスの作成
 message = Message("groq_chatbot")
-
-
-# 『保存』ボタン：
-def save_chat_history(message):
-    # 現在の日時を取得してファイル名を生成
-    current_time = datetime.now().strftime("%Y%m%d-%H%M%S")
-    filename = f"{current_time}_chatbot.json"
-
-    # チャット履歴をダウンロードするボタン
-    if st.checkbox("Save chat history?", value=False):
-        # チャット履歴をJSONに変換
-        chat_history = message.get_messages()
-        chat_json = json.dumps(chat_history, ensure_ascii=False, indent=2)
-        st.download_button(
-            label="Download as json",
-            data=chat_json,
-            file_name=filename,
-            mime="application/json",
-        )
 
 
 # sidebar: apikey input
@@ -41,17 +20,9 @@ model = ModelSelector()
 st.session_state.selected_model = model.select()
 
 # sidebar: save chat history
-with st.sidebar:
-    # カラムを作成
-    col1, col2 = st.columns([2, 1])
-    # 会話履歴保存ボタン
-    with col1:
-        save_chat_history(message)
-    # 会話履歴クリアボタン
-    with col2:
-        if st.button("クリア"):
-            message.clear_messages()
-            st.rerun()
+manage_chatbot = ManageChatbot("groq_chatbot")
+manage_chatbot.sidebar_save_clear(message)
+
 
 # main pageの内容
 st.title("Groq Chatbot")
@@ -88,7 +59,6 @@ else:
             # 通常の回答表示
             response = llm.completion(message.get_messages())
             message.add_display("assistant", response)
-
 
         # 最後のメッセージまでスクロール
         st.markdown(

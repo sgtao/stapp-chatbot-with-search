@@ -3,7 +3,7 @@ import streamlit as st
 
 class Message:
     system_prompt: str = (
-        """あなたは愉快なAIです。ユーザの入力に全て日本語で返答を生成してください"""
+        """あなたは聡明なAIです。ユーザの入力に全て日本語で返答を生成してください"""
     )
 
     def __init__(self, name):
@@ -16,6 +16,9 @@ class Message:
                     "content": self.system_prompt,
                 }
             ]
+
+    def get_name(self):
+        return self.name
 
     def add(self, role: str, content: str):
         st.session_state[self.session_key].append(
