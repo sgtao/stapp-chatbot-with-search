@@ -31,7 +31,7 @@ class ManageChatbot:
         with st.expander(
             "Save chat ?", expanded=st.session_state.checked_save
         ):
-            st.write("After chat, close it!")
+            st.write("maybe need to DL twice...")
             # チャット履歴をJSONに変換
             chat_history = message.messages_history()
             chat_json = json.dumps(chat_history, ensure_ascii=False, indent=2)

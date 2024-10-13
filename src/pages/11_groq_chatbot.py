@@ -7,6 +7,17 @@ from components.ModelSelector import ModelSelector
 from components.ManageChatbot import ManageChatbot
 from functions.GroqAPI import GroqAPI
 
+# ページの設定
+st.set_page_config(page_title="Groq Chatbot", page_icon="💬")
+
+if "system_prompt" not in st.session_state:
+    st.session_state.use_system_prompt = False
+    st.session_state.system_prompt: str = (
+        """あなたは聡明なAIです。ユーザの入力に全て日本語で返答を生成してください"""
+    )
+    st.session_state.disabled_edit_params = False
+
+
 # Message インスタンスの作成
 message = Message("groq_chatbot")
 
@@ -18,6 +29,26 @@ groq_api_key.input_key()
 # sidebar: model selector
 model = ModelSelector()
 st.session_state.selected_model = model.select()
+
+# sidebar: setup chat completion parameters
+with st.sidebar:
+    # SYSTEM_PROMPTの編集
+    if st.checkbox(
+        "use SYSTEM PROMPT",
+        value=False,
+    ):
+        st.session_state.use_system_prompt = True
+        with st.expander("Edit SYSTEM_PROMPT?", expanded=False):
+            st.session_state.system_prompt = st.text_area(
+                "Edit SYSTEM_PROMPT before chat",
+                value=st.session_state.system_prompt,
+                height=100,
+                # disabled=(not st.session_state.no_chat_history),
+                disabled=(st.session_state.disabled_edit_params),
+            )
+    else:
+        st.session_state.use_system_prompt = False
+
 
 # sidebar: save chat history
 manage_chatbot = ManageChatbot("groq_chatbot")
@@ -42,6 +73,8 @@ else:
             api_key=groq_api_key.key(),
             model_name=st.session_state.selected_model,
         )
+
+        message.append_system_prompts()
 
         message.add_display("user", prompt)
 
