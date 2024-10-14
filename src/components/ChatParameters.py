@@ -31,14 +31,13 @@ class ChatParameters:
             value=False,
         ):
             st.session_state.use_system_prompt = True
-            with st.expander("Edit SYSTEM_PROMPT?", expanded=False):
-                st.session_state.system_prompt = st.text_area(
-                    "Edit SYSTEM_PROMPT before chat",
-                    value=st.session_state.system_prompt,
-                    height=100,
-                    # disabled=(not st.session_state.no_chat_history),
-                    disabled=(st.session_state.disabled_edit_params),
-                )
+            st.session_state.system_prompt = st.text_area(
+                "Edit SYSTEM_PROMPT before chat",
+                value=st.session_state.system_prompt,
+                height=100,
+                # disabled=(not st.session_state.no_chat_history),
+                disabled=(st.session_state.disabled_edit_params),
+            )
         else:
             st.session_state.use_system_prompt = False
 

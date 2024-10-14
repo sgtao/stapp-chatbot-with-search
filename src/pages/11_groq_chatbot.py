@@ -20,24 +20,21 @@ message = Message("groq_chatbot")
 groq_api_key = GropApiKey()
 groq_api_key.input_key()
 
-# sidebar: model selector
+# sidebar:
+# - model selector
+# - save chat history
+# - setup llm completion parameters
 model = ModelSelector()
-with st.sidebar:
-    st.sidebar.title("ModelSelector")
-    st.session_state.selected_model = model.select()
-
-# sidebar: setup llm completion parameters
+manage_chatbot = ManageChatbot("groq_chatbot")
 chat_parameters = ChatParameters()
 with st.sidebar:
-    st.sidebar.title("LLM parameters")
+    st.subheader("Select a model, etc.")
+    st.session_state.selected_model = model.select()
+    st.subheader("Save chat history")
+    manage_chatbot.sidebar_save_clear(message)
+    st.subheader("LLM parameters")
     chat_parameters.system_prompt()
     chat_parameters.tuning_parameters()
-
-# sidebar: save chat history
-manage_chatbot = ManageChatbot("groq_chatbot")
-with st.sidebar:
-    st.sidebar.title("Save chat history")
-    manage_chatbot.sidebar_save_clear(message)
 
 
 # main pageの内容
