@@ -1,33 +1,13 @@
 # 11_groq_chatbot.py
 import streamlit as st
-import chardet
 
 from components.ChatParameters import ChatParameters
 from components.GropApiKey import GropApiKey
+from components.FileUploaders import FileUploaders
 from components.Message import Message
 from components.ModelSelector import ModelSelector
 from components.ManageChatbot import ManageChatbot
 from functions.GroqAPI import GroqAPI
-
-
-# ファイルの内容を読み取り、UTF-8に変換する関数
-def read_and_convert_to_utf8(file):
-    content = file.read()
-    detected = chardet.detect(content)
-    encoding = detected["encoding"]
-
-    if encoding.lower() != "utf-8":
-        try:
-            content = content.decode(encoding).encode("utf-8").decode("utf-8")
-        except UnicodeDecodeError:
-            st.error(
-                f"ファイルの文字コード（{encoding}）を正しく変換できませんでした。"
-            )
-            return None
-    else:
-        content = content.decode("utf-8")
-
-    return content
 
 
 # ページの設定
@@ -59,54 +39,27 @@ with st.sidebar:
     chat_parameters.tuning_parameters()
 
 
+file_uploaders = FileUploaders("groq_chatbot")
+
 # main pageの内容
 st.title("Groq Chatbot")
 
 if groq_api_key.has_key() is False:
     st.error("input API-Key in sidebar!")
 else:
-    # カラムを作成
-    col1, col2 = st.columns([1, 1])
+    # 初回チャット時に添付ファイルのアップローダーを表示：
     uploaded_file = None
-    # ファイルアップロード機能
-    with col1:
-        col1.subheader("Attach. text file:")
-        uploaded_file = st.file_uploader(
-            "Before 1st chat, You can upload an article",
-            type=("txt", "md"),
-            disabled=st.session_state.disabled_edit_params,
-        )
-        if message.has_chat_history() is False and uploaded_file is not None:
-            # ファイルの内容を読み取り、UTF-8に変換する
-            file_content = read_and_convert_to_utf8(uploaded_file)
-            if file_content is not None:
-                # ファイルの内容をmessageリストに追加
-                message.append_system_prompts()
-                message.add(
-                    "system",
-                    f"以下はアップロードされたファイルの内容です：\n\n{file_content}",
-                )
-            else:
-                st.error("ファイルの内容を正しく読み取れませんでした。")
-
-    # chat_history アップロード機能
-    with col2:
-        col2.subheader("Attach. past chat:")
-        uploaded_file = st.file_uploader(
-            "You can upload an previous chat history",
-            type=("json"),
-            disabled=st.session_state.disabled_edit_params,
-        )
-        if message.has_chat_history() is False and uploaded_file is not None:
-            import json
-
-            # message.アップロードされたファイルは手動でクリア
-            chat_history_messages = json.load(uploaded_file)
-            message.set_whole_messages(chat_history_messages)
-            st.session_state.disabled_edit_params = True
-
+    if message.has_chat_history() is False:
+        st.subheader("Attachment text file or chat history json:")
+        col1, col2 = st.columns([1, 1])
+        # ファイルアップロード機能
+        with col1:
+            uploaded_file = file_uploaders.text_file_upload(message)
+        # chat_history アップロード機能
+        with col2:
+            upload_file = file_uploaders.json_chat_history(message)
+    # アップロードファイルは手動クリアとなるため、メッセージ表示
     if uploaded_file is not None:
-        # アップロードされたファイルは手動でクリア
         st.warning("After clear chat, CLEAR upload_file manualy.")
 
     # ストリーム回答の切り替え
