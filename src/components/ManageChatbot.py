@@ -62,6 +62,3 @@ class ManageChatbot:
         with col2:
             if st.button("クリア"):
                 message.clear_messages()
-                # 話履歴クリア後、チェックボックスをFalseに戻す
-                st.session_state.checked_save = False
-                st.rerun()
