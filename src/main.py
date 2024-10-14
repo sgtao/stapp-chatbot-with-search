@@ -1,9 +1,10 @@
 import streamlit as st
 
 """
-# Welcome to Streamlit!
+# Welcome to stapp-chatbot-with-search apps!
 
-Edit `/src` and `/tests` to customize this app to your heart's desire :heart:.
+- This application use Groq-API.
+  - so, [Get an Groq API key](https://console.groq.com/keys)
 """
 
 # サイドバーのページに移動
