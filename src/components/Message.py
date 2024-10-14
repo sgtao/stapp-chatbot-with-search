@@ -23,8 +23,10 @@ class Message:
             self.session_key not in st.session_state
             and st.session_state[self.session_key] != []
         ):
+            st.session_state.disabled_edit_params = True
             return True
         else:
+            st.session_state.disabled_edit_params = False
             return False
 
     def append_system_prompts(self):

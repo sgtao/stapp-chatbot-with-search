@@ -1,4 +1,5 @@
 # GroqAPI.py
+import streamlit as st
 from groq import Groq
 
 
@@ -18,25 +19,30 @@ class GroqAPI:
         self.client = Groq(api_key=api_key)
         self.model_name = model_name
 
-    def _response(self, message):
-        return self.client.chat.completions.create(
-            model=self.model_name,
-            messages=message,
-            temperature=0,
-            max_tokens=4096,
-            stream=False,
-            stop=None,
-        )
-
-    def _response_stream(self, message):
-        return self.client.chat.completions.create(
-            model=self.model_name,
-            messages=message,
-            temperature=0,
-            max_tokens=4096,
-            stream=True,
-            stop=None,
-        )
+    def _response(self, message, stream=False):
+        if (
+            "change_llm_params" in st.session_state
+            and st.session_state.change_llm_params
+        ):
+            return self.client.chat.completions.create(
+                model=self.model_name,
+                messages=message,
+                max_tokens=st.session_state.max_tokens,
+                temperature=st.session_state.temperature,
+                top_p=st.session_state.top_p,
+                stream=stream,
+                stop=None,
+            )
+        else:
+            return self.client.chat.completions.create(
+                model=self.model_name,
+                messages=message,
+                max_tokens=4096,
+                temperature=1.0,
+                top_p=1.0,
+                stream=stream,
+                stop=None,
+            )
 
     def completion(self, message):
         """Groq APIにPrompt messageを送信し、レスポンスを取得します。
@@ -45,7 +51,7 @@ class GroqAPI:
         Return:
             str: レスポンスの各チャンク
         """
-        response = self._response(message)
+        response = self._response(message, stream=False)
         completion_content = response.choices[0].message.content
         return completion_content
 
@@ -69,7 +75,7 @@ class GroqAPI:
               {"role": "assistant", "content": full_response}
           )
         """
-        response = self._response_stream(message)
+        response = self._response(message, stream=True)
         for chunk in response:
             if chunk.choices[0].delta.content is not None:
                 yield chunk.choices[0].delta.content

@@ -31,8 +31,6 @@ class ModelSelector:
         Returns:
             st.selectbox of Models
         """
-        with st.sidebar:
-            st.sidebar.title("ModelSelector")
-            return st.selectbox(
-                "Select a model:", self.models, label_visibility="collapsed"
-            )
+        return st.selectbox(
+            "Select a model:", self.models, label_visibility="collapsed"
+        )

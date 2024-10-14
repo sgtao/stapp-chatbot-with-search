@@ -43,17 +43,16 @@ class ManageChatbot:
             )
 
     def sidebar_save_clear(self, message):
-        with st.sidebar:
-            # カラムを作成
-            col1, col2 = st.columns([2, 1])
-            # 会話履歴保存ボタン
-            with col1:
-                self.save_message(message)
+        # カラムを作成
+        col1, col2 = st.columns([2, 1])
+        # 会話履歴保存ボタン
+        with col1:
+            self.save_message(message)
 
-            # 会話履歴クリアボタン
-            with col2:
-                if st.button("クリア"):
-                    message.clear_messages()
-                    # 話履歴クリア後、チェックボックスをFalseに戻す
-                    st.session_state.checked_save = False
-                    st.rerun()
+        # 会話履歴クリアボタン
+        with col2:
+            if st.button("クリア"):
+                message.clear_messages()
+                # 話履歴クリア後、チェックボックスをFalseに戻す
+                st.session_state.checked_save = False
+                st.rerun()
