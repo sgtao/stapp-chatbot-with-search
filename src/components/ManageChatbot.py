@@ -29,11 +29,6 @@ class ManageChatbot:
             return
 
         # チャット履歴をダウンロードするボタン
-        # if st.checkbox(
-        #     "Save chat history?",
-        #     key="save_checkbox",
-        #     value=st.session_state.checked_save,
-        # ):
         with st.expander("Save chat ?", expanded=False):
             st.write("maybe need to DL twice...")
             # 現在の日時を取得してファイル名を生成
@@ -60,5 +55,8 @@ class ManageChatbot:
 
         # 会話履歴クリアボタン
         with col2:
-            if st.button("クリア"):
+            if st.button("Clear"):
                 message.clear_messages()
+                # 話履歴クリア後、チェックボックスをFalseに戻す
+                st.session_state.disabled_edit_params = False
+                st.rerun()

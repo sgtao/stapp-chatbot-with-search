@@ -20,7 +20,7 @@ class Message:
 
     def has_chat_history(self):
         if (
-            self.session_key not in st.session_state
+            self.session_key in st.session_state
             and st.session_state[self.session_key] != []
         ):
             st.session_state.disabled_edit_params = True

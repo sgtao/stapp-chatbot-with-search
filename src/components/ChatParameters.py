@@ -29,6 +29,7 @@ class ChatParameters:
         if st.checkbox(
             "use SYSTEM PROMPT",
             value=False,
+            disabled=st.session_state.disabled_edit_params,
         ):
             st.session_state.use_system_prompt = True
             st.session_state.system_prompt = st.text_area(
@@ -36,7 +37,7 @@ class ChatParameters:
                 value=st.session_state.system_prompt,
                 height=100,
                 # disabled=(not st.session_state.no_chat_history),
-                disabled=(st.session_state.disabled_edit_params),
+                disabled=st.session_state.disabled_edit_params,
             )
         else:
             st.session_state.use_system_prompt = False
