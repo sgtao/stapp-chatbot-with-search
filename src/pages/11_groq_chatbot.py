@@ -65,12 +65,46 @@ st.title("Groq Chatbot")
 if groq_api_key.has_key() is False:
     st.error("input API-Key in sidebar!")
 else:
+    # カラムを作成
+    col1, col2 = st.columns([1, 1])
+    uploaded_file = None
     # ファイルアップロード機能
-    uploaded_file = st.file_uploader(
-        "Before 1st question, You can upload an article",
-        type=("txt", "md"),
-        disabled=st.session_state.disabled_edit_params,
-    )
+    with col1:
+        col1.subheader("Attach. text file:")
+        uploaded_file = st.file_uploader(
+            "Before 1st chat, You can upload an article",
+            type=("txt", "md"),
+            disabled=st.session_state.disabled_edit_params,
+        )
+        if message.has_chat_history() is False and uploaded_file is not None:
+            # ファイルの内容を読み取り、UTF-8に変換する
+            file_content = read_and_convert_to_utf8(uploaded_file)
+            if file_content is not None:
+                # ファイルの内容をmessageリストに追加
+                message.append_system_prompts()
+                message.add(
+                    "system",
+                    f"以下はアップロードされたファイルの内容です：\n\n{file_content}",
+                )
+            else:
+                st.error("ファイルの内容を正しく読み取れませんでした。")
+
+    # chat_history アップロード機能
+    with col2:
+        col2.subheader("Attach. past chat:")
+        uploaded_file = st.file_uploader(
+            "You can upload an previous chat history",
+            type=("json"),
+            disabled=st.session_state.disabled_edit_params,
+        )
+        if message.has_chat_history() is False and uploaded_file is not None:
+            import json
+
+            # message.アップロードされたファイルは手動でクリア
+            chat_history_messages = json.load(uploaded_file)
+            message.set_whole_messages(chat_history_messages)
+            st.session_state.disabled_edit_params = True
+
     if uploaded_file is not None:
         # アップロードされたファイルは手動でクリア
         st.warning("After clear chat, CLEAR upload_file manualy.")
@@ -90,17 +124,6 @@ else:
 
         # 最初の質問投稿時にシステムプロンプト・添付ファイル内容をセットする
         message.append_system_prompts()
-        if message.has_chat_history() is False and uploaded_file is not None:
-            # ファイルの内容を読み取り、UTF-8に変換する
-            file_content = read_and_convert_to_utf8(uploaded_file)
-            if file_content is not None:
-                # ファイルの内容をmessageリストに追加
-                message.add(
-                    "system",
-                    f"以下はアップロードされたファイルの内容です：\n\n{file_content}",
-                )
-            else:
-                st.error("ファイルの内容を正しく読み取れませんでした。")
 
         message.add_display("user", prompt)
 

@@ -79,5 +79,8 @@ class Message:
     def messages_history(self):
         return st.session_state[self.session_key]
 
+    def set_whole_messages(self, messages):
+        st.session_state[self.session_key] = messages
+
     def clear_messages(self):
         st.session_state[self.session_key] = []
