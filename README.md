@@ -1,6 +1,9 @@
 # stapp-chatbot-with-search
 - [langchain-ai/streamlit-agent](https://github.com/langchain-ai/streamlit-agent)を参考に、Groq-APIを利用したチャットアプリを作ってみる
 
+## Demo
+- [Demo site](https://gdncakrmanvukfz9ddysng.streamlit.app/)
+
 ## Usage
 - [poetry cli](https://python-poetry.org/docs/)を利用する
 
