@@ -92,7 +92,7 @@ def custom_search(query: str) -> str:
 
 # ユーザー入力
 if prompt := st.chat_input("質問を入力してください"):
-    st.chat_message("user").write(prompt)
+    st.chat_message("user").code(prompt)
 
     # LLMとエージェントの設定
     llm = ChatGroq(
