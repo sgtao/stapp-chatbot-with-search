@@ -1,4 +1,4 @@
-# chat_with_search.py
+# chat_with_qiita.py
 import time
 
 import streamlit as st
@@ -10,18 +10,19 @@ from langchain_community.chat_message_histories import (
 )
 
 # from langchain_community.tools import DuckDuckGoSearchRun
-from langchain_community.tools import DuckDuckGoSearchResults
+# from langchain_community.tools import DuckDuckGoSearchResults
 from langchain_core.runnables import RunnableConfig
 from langchain_groq import ChatGroq
 from langchain.tools import Tool
 
 from components.GropApiKey import GropApiKey
 from components.ModelSelector import ModelSelector
+from functions.QiitaApiItems import QiitaApiItems
 
-st.set_page_config(page_title="LangChain: Chat with search", page_icon="🦜")
-st.title("🦜 LangChain: Chat with search")
-page_description = """このページはDuckDuckGoSearchRunで検索した結果からの回答します。
-検索に失敗する場合は、1分待って再検索することをお勧めします。
+st.set_page_config(page_title="LangChain: Chat with search", page_icon="🔍")
+st.title("🔍LangChain: Chat with Qiita search")
+page_description = """このページはQiita APIで検索した１つの結果からの回答します。
+そのため、検索結果外としてないこともあります。
 """
 st.info(page_description)
 
@@ -82,12 +83,26 @@ def custom_search(query: str) -> str:
     別の方法で質問にお答えしますので、もう一度お試しください。
     """
     try:
+        qiit_items = QiitaApiItems()
         # print(f"search query is {query}")
         time.sleep(1)  # レートリミット対策として1秒待機
         # search = DuckDuckGoSearchRun()
         # return search.run(query)
-        search = DuckDuckGoSearchResults()
-        return search.invoke(query)
+        # search = DuckDuckGoSearchResults()
+        # return search.invoke(query)
+        articles = qiit_items.get_articles(
+            params={"query": query},
+            page_size=1,
+        )
+        article_bodies = []
+        for article in articles:
+            article_bodies.append(
+                {
+                    "title": article["title"],
+                    "body": article["body"],
+                }
+            )
+        return article_bodies
     except Exception as e:
         st.warning(f"検索中にエラーが発生しました: {str(e)}")
         return exception_msg
@@ -105,8 +120,8 @@ if prompt := st.chat_input("質問を入力してください"):
     )
     # カスタム検索ツールの作成
     # tools = [DuckDuckGoSearchRun(name="Search")]
-    search_description = """useful for when you need to answer questions
-    about current events or the current state of the world
+    search_description = """useful for answering questions about
+    software technology, web design, AI, and other ICT fields.
     """
     search_tool = Tool(
         name="Search", func=custom_search, description=search_description

@@ -12,5 +12,5 @@ st.page_link("pages/11_groq_chatbot.py", label="Go to Groq Chatbot", icon="💬"
 st.page_link(
     "pages/12_chat_with_search.py",
     label="Go to LangChain: Chat with search",
-    icon="🦜"
+    icon="🦜",
 )

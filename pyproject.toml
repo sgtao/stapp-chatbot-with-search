@@ -15,6 +15,7 @@ langchain = "^0.3.3"
 langchain-community = "^0.3.2"
 langchain-groq = "^0.2.0"
 duckduckgo-search = "^6.3.0"
+requests = "^2.32.3"
 
 
 [tool.poetry.group.dev.dependencies]
