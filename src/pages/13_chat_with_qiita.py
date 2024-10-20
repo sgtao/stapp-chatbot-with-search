@@ -75,12 +75,7 @@ def custom_search(query: str) -> str:
             article_body = article["body"]
             if len(article_body) >= 800:
                 article_body = summarize_message(article_body, 800)
-            article_bodies.append(
-                {
-                    "title": article["title"],
-                    "body": article_body,
-                }
-            )
+            article_bodies.append(f'# {article["title"]}\n{article_body}')
         return article_bodies
     except Exception as e:
         st.warning(f"検索中にエラーが発生しました: {str(e)}")
@@ -157,7 +152,9 @@ if prompt := st.chat_input("質問を入力してください"):
     # カスタム検索ツールの作成
     # tools = [DuckDuckGoSearchRun(name="Search")]
     search_description = """useful for answering questions about
-    software technology, web design, AI, and other ICT fields.
+    software technology, ICT related fields including computer software,
+    web design, artificial intelligence, data analysis, cloud computing,
+    cybersecurity, networking, databases and other related topics.
     """
     search_tool = Tool(
         name="Search", func=custom_search, description=search_description
