@@ -14,15 +14,83 @@ from langchain_community.chat_message_histories import (
 from langchain_core.runnables import RunnableConfig
 from langchain_groq import ChatGroq
 from langchain.tools import Tool
+from langchain.prompts import PromptTemplate
 
 from components.GropApiKey import GropApiKey
 from components.ModelSelector import ModelSelector
+from functions.GroqAPI import GroqAPI
 from functions.QiitaApiItems import QiitaApiItems
+
+
+def summarize_message(message: str, limit: int) -> str:
+    """メッセージを要約する
+    Args:
+        message (str): オリジナルメッセージ
+        limit (int): 上限文字数
+    Returns:
+        str: 要約した文章
+    """
+    # PromptTemplateを作成
+    prompt_template = PromptTemplate.from_template(
+        "以下のメッセージを{limit}文字以内に要約してください。"
+        "要約は日本語で行ってください。\n\n"
+        "メッセージ: {message}\n\n"
+        "要約:"
+    )
+    # メッセージを先頭の5,000文字に制限
+    truncated_message = message[:5000]
+    # プロンプトを生成
+    prompt = prompt_template.format(message=truncated_message, limit=limit)
+    # print(prompt)
+    # 通常の回答表示
+    llm = GroqAPI(
+        api_key=st.session_state.groq_api_key,
+        model_name="llama-3.1-8b-instant",
+    )
+    summarized_message = llm.completion([{"role": "user", "content": prompt}])
+    # print("## 要約文：")
+    # print(summarized_message)
+    return summarized_message
+
+
+# カスタム検索ツールの定義
+def custom_search(query: str) -> str:
+    exception_msg = """申し訳ありませんが、現在検索サービスにアクセスできません。
+    別の方法で質問にお答えしますので、もう一度お試しください。
+    """
+    try:
+        qiit_items = QiitaApiItems()
+        # print(f"search query is {query}")
+        time.sleep(1)  # レートリミット対策として1秒待機
+        # search = DuckDuckGoSearchRun()
+        # return search.run(query)
+        # search = DuckDuckGoSearchResults()
+        # return search.invoke(query)
+        articles = qiit_items.get_articles(
+            params={"query": query},
+            page_size=5,
+        )
+        article_bodies = []
+        for article in articles:
+            article_body = article["body"]
+            if len(article_body) >= 800:
+                article_body = summarize_message(article_body, 800)
+            article_bodies.append(
+                {
+                    "title": article["title"],
+                    "body": article_body,
+                }
+            )
+        return article_bodies
+    except Exception as e:
+        st.warning(f"検索中にエラーが発生しました: {str(e)}")
+        return exception_msg
+
 
 st.set_page_config(page_title="LangChain: Chat with search", page_icon="🔍")
 st.title("🔍LangChain: Chat with Qiita search")
-page_description = """このページはQiita APIで検索した１つの結果からの回答します。
-そのため、検索結果外としてないこともあります。
+page_description = """このページはQiita APIで検索した５つの結果からの回答します。
+検索結果は要約することもあるため、すべての情報を利用するとは限りません。
 """
 st.info(page_description)
 
@@ -75,38 +143,6 @@ for msg in msgs.messages:
 #                 st.write(step[0].log)
 #                 st.write(step[1])
 #         st.write(msg.content)
-
-
-# カスタム検索ツールの定義
-def custom_search(query: str) -> str:
-    exception_msg = """申し訳ありませんが、現在検索サービスにアクセスできません。
-    別の方法で質問にお答えしますので、もう一度お試しください。
-    """
-    try:
-        qiit_items = QiitaApiItems()
-        # print(f"search query is {query}")
-        time.sleep(1)  # レートリミット対策として1秒待機
-        # search = DuckDuckGoSearchRun()
-        # return search.run(query)
-        # search = DuckDuckGoSearchResults()
-        # return search.invoke(query)
-        articles = qiit_items.get_articles(
-            params={"query": query},
-            page_size=1,
-        )
-        article_bodies = []
-        for article in articles:
-            article_bodies.append(
-                {
-                    "title": article["title"],
-                    "body": article["body"],
-                }
-            )
-        return article_bodies
-    except Exception as e:
-        st.warning(f"検索中にエラーが発生しました: {str(e)}")
-        return exception_msg
-
 
 # ユーザー入力
 if prompt := st.chat_input("質問を入力してください"):
